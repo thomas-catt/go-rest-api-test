@@ -1,2 +1,2 @@
 # REST API in Go
-a REST api in go using Echo
+a REST api in go using Echo and SQLite
