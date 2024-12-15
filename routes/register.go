@@ -5,8 +5,8 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net/http"
-	"rest-api/db"
 	"rest-api/types"
+	"rest-api/utils"
 
 	"github.com/labstack/echo/v4"
 	_ "github.com/mattn/go-sqlite3"
@@ -21,8 +21,8 @@ func Register(c echo.Context) error {
 
 	hashedPasssword := hex.EncodeToString(md5.New().Sum([]byte(user.Password)))
 
-	stmt, _ := db.DB.Prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)")
-	_, err := stmt.Exec(user.Name, user.Email, hashedPasssword)
+	stmt, _ := utils.DB.Prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)")
+	result, err := stmt.Exec(user.Name, user.Email, hashedPasssword)
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -31,9 +31,21 @@ func Register(c echo.Context) error {
 		})
 	}
 
-	jwtToken := ""
+	id, _ := result.LastInsertId()
+
+	jwtToken := utils.CreateJWT(types.TokenUser{
+		Id:    id,
+		Email: user.Email,
+	})
+
+	if jwtToken == "" {
+		return c.JSON(http.StatusInternalServerError, types.Response{
+			Message: "An unexpected error occured.",
+		})
+	}
+
 	r := types.AuthResponse{
-		Message: "User created",
+		Message: "User created.",
 		Token:   jwtToken,
 	}
 

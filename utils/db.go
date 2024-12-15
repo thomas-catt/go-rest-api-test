@@ -1,4 +1,4 @@
-package db
+package utils
 
 import (
 	"database/sql"
@@ -7,7 +7,7 @@ import (
 
 var DB *sql.DB
 
-func Init() {
+func InitDB() {
 	var err error
 	DB, err = sql.Open("sqlite3", "users.db")
 
